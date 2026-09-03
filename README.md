@@ -4,7 +4,9 @@ Doohickey
 ## Quick Reference
 --------
 X - Carriage movement (translational config)
+
 Y - Mandrel Rotation (rotational config)
+
 Z - Delivery Head Rotation (rotational config)
 
 The following information is copied from [Andrew Reilly's Cyclone](https://github.com/reilleya/cyclone/blob/main/readme.md?plain=1) repository for easy reference. 
