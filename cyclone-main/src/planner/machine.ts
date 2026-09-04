@@ -51,7 +51,7 @@ export class WinderMachine {
         if (this.verboseOutput) {
             this.insertComment(`Move from ${serializeCoordinate(this.lastPosition)} to ${serializeCoordinate(completeEndPosition)} in ${numSegments} segments`);
         }
-        for (let intermediatePosition of interpolateCoordinates(this.lastPosition, completeEndPosition, numSegments)) {
+        for (const intermediatePosition of interpolateCoordinates(this.lastPosition, completeEndPosition, numSegments)) {
             this.moveSegment(intermediatePosition);
         }
     }
@@ -59,10 +59,12 @@ export class WinderMachine {
     public setPosition(position: TCoordinate): void {
         let command = 'G92';
         for (const axis of Object.keys(position)) {
+            const coordAxis = axis as ECoordinateAxes;
+            if (coordAxis == null || position[coordAxis] == null || this.lastPosition[coordAxis] == null)continue;
             const rawAxis = AxisLookup[axis as ECoordinateAxes];
-            command += ` ${rawAxis}${stripPrecision(position[axis as ECoordinateAxes])}`;
+            command += ` ${rawAxis}${stripPrecision(position[axis as ECoordinateAxes]??0)}`;
 
-            this.lastPosition[axis as ECoordinateAxes] = position[axis as ECoordinateAxes];
+            this.lastPosition[coordAxis] = position[axis as ECoordinateAxes]!;
         }
         this.gcode.push(command);
     }
@@ -111,12 +113,13 @@ export class WinderMachine {
         let command = 'G0';
         for (const axis in position) {
             const rawAxis = AxisLookup[axis as ECoordinateAxes];
-            command += ` ${rawAxis}${stripPrecision(position[axis as ECoordinateAxes])}`;
+            const axisValue = position[axis as ECoordinateAxes] ?? 0;
+            command += ` ${rawAxis}${stripPrecision(axisValue)}`;
 
             // Everything in this loop below here is just for the profiler
 
             // Get the amount this axis moved
-            const moveComponent = position[axis as ECoordinateAxes] - this.lastPosition[axis as ECoordinateAxes];
+            const moveComponent = axisValue - this.lastPosition[axis as ECoordinateAxes];
 
             // Add this onto the tally of "marlin units" that we will use to estimate time
             totalDistanceMarlinUnitsSq += moveComponent ** 2;
@@ -141,7 +144,7 @@ export class WinderMachine {
                 }
             }
 
-            this.lastPosition[axis as ECoordinateAxes] = position[axis as ECoordinateAxes];
+            this.lastPosition[axis as ECoordinateAxes] = axisValue;
         }
 
         // Assumes instantaneous acceleration

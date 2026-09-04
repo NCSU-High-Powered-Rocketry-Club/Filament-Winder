@@ -77,4 +77,4 @@ export function plotGCode(gcode: string[]): Readable | void {
     }
 
     return canvas.createPNGStream();
-};
+}

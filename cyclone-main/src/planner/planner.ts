@@ -216,7 +216,7 @@ export function planHelicalLayer(machine: WinderMachine, layerParameters: ILayer
         for(let inPatternIndex = 0; inPatternIndex < patternNumber; inPatternIndex ++) {
             machine.insertComment(`\tPattern: ${patternIndex + 1}/${numberOfPatterns} Circuit: ${inPatternIndex + 1}/${patternNumber}`);
 
-            for (let passParams of passParameters) {
+            for (const passParams of passParameters) {
                 // Wind to the start point for this pass, while tilting the delivery head to clean up from last pass
                 machine.move({
                     [ECoordinateAxes.MANDREL]: mandrelPositionDegrees,

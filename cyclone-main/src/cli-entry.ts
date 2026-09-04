@@ -1,9 +1,13 @@
 import { MarlinPort } from './marlin-port';
 import { planWind } from './planner';
 import { plotGCode } from './plotter';
-import { hideBin } from 'yargs/helpers';
 import { promises as fs, createWriteStream } from 'fs';
 import * as readline from 'readline';
+
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
+const { hideBin } = require('yargs/helpers') as {
+    hideBin: (argv: string[]) => string[];
+};
 
 // Looks like using yargs most any other way is kind of broken
 /* eslint-disable-next-line @typescript-eslint/no-var-requires */

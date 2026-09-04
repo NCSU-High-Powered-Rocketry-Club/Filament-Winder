@@ -4,8 +4,8 @@ import { isObject } from './helpers';
 export class MarlinPort {
     
     private isInitialized = false;
-    private port: SerialPort;
-    private parser: ReadlineParser;
+    private port!: SerialPort;
+    private parser!: ReadlineParser;
 
     private commandQueue: string[] = [];
     private hasCommandWaiting = false;
@@ -40,7 +40,7 @@ export class MarlinPort {
         return new Promise((resolve, reject) => {
             console.log(`Opening "${this.portPath}" at ${this.baudRate} baud`);
             this.port.open((error) => {
-              if (isObject(error)) {
+              if (error?.message) {
                 return reject(`Error opening port: ${error.message}`);
               }
               console.log('Port opened.\n');
@@ -137,6 +137,7 @@ export class MarlinPort {
             return void 0;
         }
         const commandToSend = this.commandQueue.shift();
+        if (commandToSend == null) return;
         // Check for comments
         if (commandToSend.slice(0, 1) === ';') {
             console.log(commandToSend.slice(1).trim())
