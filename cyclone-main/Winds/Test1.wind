@@ -1,0 +1,33 @@
+{
+    "layers": [
+        {
+            "windType": "helical",
+            "windAngle": 55,
+            "patternNumber": 1,
+            "skipIndex": 1,
+            "lockDegrees": 720,
+            "leadInMM": 30,
+            "leadOutDegrees": 90,
+            "skipInitialNearLock": true
+        },
+        {
+            "windType": "helical",
+            "windAngle": 35,
+            "patternNumber": 1,
+            "skipIndex": 1,
+            "lockDegrees": 720,
+            "leadInMM": 30,
+            "leadOutDegrees": 90,
+            "skipInitialNearLock": true
+        }
+    ],
+    "mandrelParameters": {
+        "diameter": 76.2,
+        "windLength": 590.55
+    },
+    "towParameters": {
+        "width": 4,
+        "thickness": 3
+    },
+    "defaultFeedRate": 9000
+}
