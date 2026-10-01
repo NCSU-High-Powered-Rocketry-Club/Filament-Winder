@@ -1,15 +1,5 @@
-Doohickey
+Cyclone
 ==========
-
-## Quick Reference
---------
-X - Carriage movement (translational config)
-
-Y - Mandrel Rotation (rotational config)
-
-Z - Delivery Head Rotation (rotational config)
-
-The following information is copied from [Andrew Reilly's Cyclone](https://github.com/reilleya/cyclone/blob/main/readme.md?plain=1) repository for easy reference. 
 
 Overview
 --------
@@ -17,7 +7,7 @@ Cyclone is a script for generating and executing filament winding toolpaths. It 
 
 Download and Setup
 -------
-Cyclone is currently provided only as the source code, which can be cloned or downloaded from this repository. The script requires [node.js](https://nodejs.org/)) to run. Once node.js is installed and Cyclone is downloaded, navigate to the Cyclone directory in a terminal and install its dependencies with: 
+Cyclone is currently provided ony as the source code, which can be cloned or downloaded from this repository. The script requires [node.js](https://nodejs.org/)) to run. Once node.js is installed and Cyclone is downloaded, navigate to the Cyclone directory in a terminal and install its dependencies with: 
 ```
 npm i
 ```
