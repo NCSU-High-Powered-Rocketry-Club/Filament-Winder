@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filament Winder V40 | Restored Logic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://esm.sh/three@0.160.0",
+            "three/addons/": "https://esm.sh/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #1a2a3a, #0d1a26); color: #ecf0f1; line-height: 1.6; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: 420px 1fr; gap: 20px; height: 95vh; }
+        
+        header { grid-column: 1 / -1; text-align: center; margin-bottom: 10px; padding: 15px; background: rgba(0, 0, 0, 0.25); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        .card { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { margin-bottom: 5px; font-weight: bold; color: #95a5a6; font-size: 0.9em; }
+        .input-group input, .input-group select { width: 100%; padding: 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid #34495e; border-radius: 6px; color: #ecf0f1; font-size: 0.95em; }
+        
+        .btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; margin-top: 10px;}
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-success { background-color: #2ecc71; color: white; }
+        .btn-danger { background-color: #e74c3c; color: white; padding: 5px 10px; font-size: 0.8em; margin-top:0;}
+        .btn-warning { background-color: #f1c40f; color: #000; }
+
+        /* V40 Styles */
+        .extra-input input { background: rgba(46, 204, 113, 0.15); border-color: #2ecc71; color: #fff; font-weight:bold; }
+        .extra-input label { color: #2ecc71; }
+
+        /* Layer Stack Styles */
+        #layer-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .layer-item { 
+            background: rgba(255,255,255,0.05); 
+            border-left: 4px solid #3498db; 
+            padding: 10px; 
+            border-radius: 4px; 
+        }
+        .layer-item.hoop { border-left-color: #f1c40f; }
+        .layer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .layer-title { font-weight: bold; font-size: 0.9em; color: #fff; }
+        .layer-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .mini-input label { font-size: 0.75em; color: #aaa; display: block; }
+        .mini-input input { width: 100%; font-size: 0.9em; padding: 4px; }
+        .calc-badge { font-size: 0.75em; color: #aaa; grid-column: 1 / -1; margin-top: 5px; border-top:1px solid #333; padding-top:5px;}
+
+        /* Viewer Styles */
+        .tab-bar { display: flex; background: rgba(0,0,0,0.5); border-bottom: 1px solid #3498db; margin-bottom: 0; border-radius: 12px 12px 0 0; overflow: hidden; }
+        .tab { padding: 12px 20px; cursor: pointer; color: #aaa; font-weight: bold; flex: 1; text-align: center; transition: 0.2s; background: rgba(255,255,255,0.05); }
+        .tab.active { background: #3498db; color: white; }
+        
+        #viewer-container { position: relative; flex-grow: 1; background: #000; border-radius: 0 0 12px 12px; overflow: hidden; border: 1px solid #3498db; border-top: none; display: flex; flex-direction: column; }
+        .view-content { flex-grow: 1; position: absolute; top:0; left:0; width: 100%; height: 100%; display: none; }
+        .view-content.active { display: block; }
+        #canvas-wrapper { width: 100%; height: 100%; }
+        #canvas-2d-wrapper { width: 100%; height: 100%; overflow: hidden; background: #222; display: flex; justify-content: center; align-items: center; }
+        #canvas2d { background: #eee; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-height: 95%; max-width: 95%; }
+        
+        #gcode-output { height: 100px; background: #0d1a26; padding: 10px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.85em; overflow-y: auto; color: #bdc3c7; border: 1px solid #333; white-space: pre-wrap; }
+        #loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; color:white; z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+        #loading-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .overlay-controls { position: absolute; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; display: flex; gap: 10px; align-items: center; z-index: 10; }
+        #simSlider { flex-grow: 1; cursor: pointer; }
+        #playBtn { background:none; border:none; color:white; font-size:1.2em; cursor:pointer; width:30px; }
+        .legend-2d { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 4px; font-size: 0.8em; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LEFT: CONTROLS -->
+        <div class="input-panel card">
+            <h2><i class="fas fa-layer-group"></i> Filament Winder V40</h2>
+            
+            <!-- Global Settings -->
+            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                <h3 style="font-size: 0.9em; color: #aaa; margin-bottom: 5px; text-transform: uppercase;">Machine Globals</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group">
+                        <label>Mandrel Dia (mm)</label>
+                        <input type="number" id="mandrelDiameter" value="22.63">
+                    </div>
+                    <div class="input-group">
+                        <label>Length (mm)</label>
+                        <input type="number" id="partLength" value="150">
+                    </div>
+                    <div class="input-group">
+                        <label>Feed (mm/min)</label>
+                        <input type="number" id="feedRate" value="8000">
+                    </div>
+                    <div class="input-group">
+                        <label>Dwell (mm/min)</label>
+                        <input type="number" id="dwellSpeed" value="2000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer List -->
+            <div id="layer-stack"></div>
+
+            <!-- Add Buttons -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <button class="btn btn-success" onclick="addLayer('helical')"><i class="fas fa-plus"></i> Add Helical</button>
+                <button class="btn btn-warning" onclick="addLayer('hoop')"><i class="fas fa-plus"></i> Add Hoop</button>
+            </div>
+            
+            <div style="border-top: 1px solid #444; margin: 15px 0;"></div>
+
+            <button id="generateBtn" class="btn btn-primary"><i class="fas fa-play"></i> Generate Stack G-Code</button>
+            
+            <div style="margin-top: auto;">
+                <label style="font-weight:bold; color:#aaa;">G-Code Output</label>
+                <div id="gcode-output"></div>
+                <button id="copyBtn" class="btn btn-primary" style="margin-top:5px; width:100%; padding: 5px;">Copy G-Code</button>
+            </div>
+        </div>
+
+        <!-- RIGHT: SIMULATION -->
+        <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <div class="tab-bar">
+                <div class="tab active" onclick="window.switchView('3d')"><i class="fas fa-cube"></i> 3D View</div>
+                <div class="tab" onclick="window.switchView('2d')"><i class="fas fa-map"></i> 2D Coverage Map</div>
+            </div>
+
+            <div id="viewer-container">
+                <div id="loading-overlay">Generating...</div>
+                
+                <!-- 3D VIEW -->
+                <div id="view-3d" class="view-content active">
+                    <div id="canvas-wrapper"></div>
+                    <div class="overlay-controls">
+                        <button id="playBtn" onclick="togglePlay()"><i class="fas fa-play"></i></button>
+                        <input type="range" id="simSlider" min="0" max="100" value="100">
+                        <span id="simProgress">100%</span>
+                    </div>
+                </div>
+
+                <!-- 2D VIEW -->
+                <div id="view-2d" class="view-content">
+                    <div class="legend-2d">
+                        <span style="color:#7b1fa2;">█</span> Fiber (Purple)<br>
+                        <span style="color:#ffd600;">█</span> Tow Core (Yellow)<br>
+                        <span style="color:#2980b9;">█</span> Hoop (Blue)
+                    </div>
+                    <div id="canvas-2d-wrapper">
+                        <canvas id="canvas2d"></canvas>
+                    </div>
+                    <div class="overlay-controls">
+                        <button id="playBtn2" onclick="togglePlay()"><i class="fas fa-play"></i></button>
+                        <input type="range" id="simSlider2" min="0" max="100" value="100">
+                        <span id="simProgress2">100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, controls, mandrelMesh, fiberGroup;
+        let gcodeLines = [];
+        let layerCount = 0;
+        let isPlaying = false;
+
+        window.addEventListener('load', () => {
+            init3D();
+            
+            // Listeners for Global Updates
+            const globals = ['mandrelDiameter', 'partLength'];
+            globals.forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                   updateMandrelFromInputs();
+                   document.querySelectorAll('.layer-item').forEach(el => {
+                       const id = el.id.replace('layer-', '');
+                       if(el.dataset.type === 'helical') updateLayerCalc(id);
+                   });
+                });
+            });
+            // Slider Link
+            document.getElementById('simSlider').addEventListener('input', (e) => updateSimulation(e.target.value));
+            document.getElementById('simSlider2').addEventListener('input', (e) => updateSimulation(e.target.value));
+
+            addLayer('helical');
+        });
+
+        function updateMandrelFromInputs() {
+            const d = parseFloat(document.getElementById('mandrelDiameter').value);
+            const l = parseFloat(document.getElementById('partLength').value);
+            if(!isNaN(d) && !isNaN(l)) updateMandrel(d, l);
+        }
+
+        // --- LAYER UI ---
+        window.addLayer = function(type) {
+            layerCount++;
+            const container = document.getElementById('layer-stack');
+            const div = document.createElement('div');
+            div.className = `layer-item ${type}`;
+            div.id = `layer-${layerCount}`;
+            div.dataset.type = type;
+
+            let content = `
+                <div class="layer-header">
+                    <span class="layer-title">#${layerCount} ${type.toUpperCase()} LAYER</span>
+                    <button class="btn btn-danger" onclick="removeLayer(${layerCount})"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="layer-controls">
+            `;
+
+            if(type === 'helical') {
+                content += `
+                    <div class="mini-input">
+                        <label>Angle (°)</label>
+                        <input type="number" class="l-angle" value="45" oninput="updateLayerCalc(${layerCount})">
+                    </div>
+                    <div class="mini-input">
+                        <label>Fiber Width</label>
+                        <input type="number" class="l-width" value="3.3" oninput="updateLayerCalc(${layerCount})">
+                    </div>
+                    <div class="mini-input">
+                        <label>Skip Index</label>
+                        <input type="number" class="l-skip" value="5" oninput="updateLayerCalc(${layerCount})">
+                    </div>
+                    <div class="mini-input extra-input">
+                        <label>Extra Passes</label>
+                        <input type="number" class="l-extra" value="0" title="Adds manual safety passes">
+                    </div>
+                    <div class="mini-input">
+                        <label>Lock Deg</label>
+                        <input type="number" class="l-lock" value="360">
+                    </div>
+                    <div class="calc-badge" id="calc-${layerCount}">Auto: - Circuits</div>
+                `;
+            } else {
+                content += `
+                    <div class="mini-input">
+                        <label>Fiber Width</label>
+                        <input type="number" class="l-width" value="3.3">
+                    </div>
+                    <div class="mini-input">
+                        <label>Overlap %</label>
+                        <input type="number" class="l-overlap" value="5">
+                    </div>
+                    <div class="mini-input">
+                        <label>Lock Deg</label>
+                        <input type="number" class="l-lock" value="360">
+                    </div>
+                `;
+            }
+            content += `</div>`;
+            div.innerHTML = content;
+            container.appendChild(div);
+            if(type === 'helical') updateLayerCalc(layerCount);
+        };
+
+        window.removeLayer = function(id) {
+            document.getElementById(`layer-${id}`).remove();
+        };
+
+        window.updateLayerCalc = function(id) {
+            const el = document.getElementById(`layer-${id}`);
+            if(!el) return;
+            const diam = parseFloat(document.getElementById('mandrelDiameter').value);
+            const width = parseFloat(el.querySelector('.l-width').value);
+            const angle = parseFloat(el.querySelector('.l-angle').value);
+            const skip = parseInt(el.querySelector('.l-skip').value);
+            
+            if([diam, width, angle, skip].some(isNaN)) return;
+            
+            const circ = Math.PI * diam;
+            const angleRad = angle * (Math.PI/180);
+            const projectedWidth = width / Math.cos(angleRad);
+            const bandsNeeded = (circ / (projectedWidth * 0.95));
+            let circuits = Math.ceil(bandsNeeded);
+            
+            while(gcd(circuits, skip) > 1) circuits++;
+            
+            el.querySelector('.calc-badge').innerHTML = `Auto-Calc: ${circuits} Circuits`;
+            el.dataset.circuits = circuits;
+        };
+        
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+        // --- GCODE GENERATION ---
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            document.getElementById('loading-overlay').classList.add('active');
+            setTimeout(() => {
+                const gcode = generateStackGCode();
+                if(gcode) {
+                    gcodeLines = gcode.split('\n');
+                    update3DSimulation(gcodeLines);
+                    updateSimulation(100); 
+                    if(document.getElementById('view-2d').classList.contains('active')) {
+                        draw2DMap(gcodeLines, 100);
+                    }
+                }
+                document.getElementById('loading-overlay').classList.remove('active');
+            }, 50);
+        });
+
+        function generateStackGCode() {
+            const diam = parseFloat(document.getElementById('mandrelDiameter').value);
+            const length = parseFloat(document.getElementById('partLength').value);
+            const feedRate = parseFloat(document.getElementById('feedRate').value);
+            const dwellSpeed = parseFloat(document.getElementById('dwellSpeed').value);
+            const layers = document.querySelectorAll('.layer-item');
+            
+            if([diam, length, feedRate].some(isNaN)) return alert("Check Globals");
+
+            let gcode = `; --- Multi-Stage Winding Program V40 (Restored) ---\n`;
+            gcode += `G90\nG92 Y0 Z0\n\n`;
+            
+            let currentY = 0;
+            const circ = Math.PI * diam; // CONSTANT DIAMETER LOGIC
+
+            layers.forEach((layer, idx) => {
+                const type = layer.dataset.type;
+                gcode += `; === LAYER ${idx+1} [${type.toUpperCase()}] ===\n`;
+                
+                const width = parseFloat(layer.querySelector('.l-width').value);
+                const lockDeg = parseFloat(layer.querySelector('.l-lock').value);
+                
+                if(type === 'helical') {
+                    const angle = parseFloat(layer.querySelector('.l-angle').value);
+                    const skip = parseInt(layer.querySelector('.l-skip').value);
+                    const circuits = parseInt(layer.dataset.circuits); // Auto Pattern
+                    const extra = parseInt(layer.querySelector('.l-extra').value) || 0; // Extra Passes
+                    
+                    const angleRad = angle * (Math.PI / 180);
+                    const rotationsForLength = (length * Math.tan(angleRad) / circ) * 360;
+                    // IMPORTANT: skipStep depends ONLY on the base pattern (circuits), not extra passes
+                    const skipStep = (360 / circuits) * skip;
+                    
+                    const fwdZ = (90 - angle) + 35; 
+                    const revZ = -((90 - angle) + 35);
+
+                    // Loop runs longer to create overlap
+                    const totalLoops = circuits + extra;
+
+                    for(let i=0; i<totalLoops; i++) {
+                        gcode += `G1 Z${fwdZ.toFixed(2)} F2000\n`;
+                        currentY += rotationsForLength;
+                        gcode += `G1 X${length} Y${currentY.toFixed(4)} F${feedRate}\n`;
+                        currentY += lockDeg;
+                        gcode += `G1 Y${currentY.toFixed(4)} Z0 F${dwellSpeed}\n`;
+                        
+                        gcode += `G1 Z${revZ.toFixed(2)} F2000\n`;
+                        currentY += rotationsForLength;
+                        gcode += `G1 X0 Y${currentY.toFixed(4)} F${feedRate}\n`;
+                        
+                        const natural = (rotationsForLength * 2) + (lockDeg * 2);
+                        const drift = natural % 360;
+                        let correction = skipStep - drift;
+                        while(correction < 0) correction += 360;
+                        while(correction >= 360) correction -= 360;
+                        if(Math.abs(correction) < 0.01) correction = 0;
+                        
+                        currentY += lockDeg + correction;
+                        gcode += `G1 Y${currentY.toFixed(4)} Z0 F${dwellSpeed}\n\n`;
+                    }
+                } else {
+                    const overlap = parseFloat(layer.querySelector('.l-overlap').value);
+                    const pitch = width * (1 - (overlap/100));
+                    const rots = length / pitch;
+                    const degs = rots * 360;
+                    
+                    gcode += `G1 Z35 F2000\n`; 
+                    gcode += `G1 X${length} Y${(currentY + degs).toFixed(4)} F${feedRate}\n`;
+                    currentY += degs + lockDeg;
+                    gcode += `G1 Y${currentY.toFixed(4)} F${dwellSpeed}\n`;
+                    gcode += `G1 X0 Y${(currentY + degs).toFixed(4)} F${feedRate}\n`;
+                    currentY += degs + lockDeg;
+                    gcode += `G1 Y${currentY.toFixed(4)} F${dwellSpeed}\n\n`;
+                }
+            });
+            
+            gcode += `M117 Complete\nM2\n`;
+            document.getElementById('gcode-output').textContent = gcode;
+            return gcode;
+        }
+
+        // --- ANIMATION LOGIC ---
+        window.togglePlay = function() {
+            isPlaying = !isPlaying;
+            const icon = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            document.getElementById('playBtn').innerHTML = icon;
+            document.getElementById('playBtn2').innerHTML = icon;
+            if(isPlaying) {
+                if(parseInt(document.getElementById('simSlider').value) >= 100) updateSimulation(0);
+                playLoop();
+            }
+        };
+
+        function playLoop() {
+            if(!isPlaying) return;
+            let val = parseFloat(document.getElementById('simSlider').value);
+            val += 0.5; // Speed
+            if(val >= 100) {
+                val = 100;
+                isPlaying = false;
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
+                document.getElementById('playBtn2').innerHTML = '<i class="fas fa-play"></i>';
+            }
+            updateSimulation(val);
+            requestAnimationFrame(playLoop);
+        }
+
+        function updateSimulation(val) {
+            document.getElementById('simSlider').value = val;
+            document.getElementById('simSlider2').value = val;
+            document.getElementById('simProgress').textContent = Math.round(val) + '%';
+            document.getElementById('simProgress2').textContent = Math.round(val) + '%';
+            
+            if(fiberGroup?.children[0]) {
+                const count = fiberGroup.children[0].geometry.attributes.position.count;
+                fiberGroup.children[0].geometry.setDrawRange(0, Math.floor(count * (val/100)));
+            }
+            
+            if(gcodeLines.length > 0 && document.getElementById('view-2d').classList.contains('active')) {
+                draw2DMap(gcodeLines, val);
+            }
+        }
+
+        // --- 3D / 2D SETUP ---
+        function init3D() {
+            const container = document.getElementById('canvas-wrapper');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 1, 10000);
+            camera.position.set(0, 100, 250);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const dl = new THREE.DirectionalLight(0xffffff, 0.8);
+            dl.position.set(100,200,100);
+            scene.add(dl);
+            
+            const d = parseFloat(document.getElementById('mandrelDiameter').value);
+            const l = parseFloat(document.getElementById('partLength').value);
+            updateMandrel(d, l);
+            animate();
+        }
+
+        function updateMandrel(d, l) {
+            if(mandrelMesh) scene.remove(mandrelMesh);
+            const g = new THREE.CylinderGeometry(d/2, d/2, l, 64);
+            g.rotateZ(Math.PI/2);
+            g.translate(l/2, 0, 0);
+            mandrelMesh = new THREE.Mesh(g, new THREE.MeshPhongMaterial({color:0x3498db, transparent:true, opacity:0.8, side:THREE.DoubleSide}));
+            scene.add(mandrelMesh);
+        }
+
+        function update3DSimulation(lines) {
+            if(fiberGroup) scene.remove(fiberGroup);
+            fiberGroup = new THREE.Group();
+            const pts = [];
+            const r = (parseFloat(document.getElementById('mandrelDiameter').value)/2) + 0.1;
+            let lx=0, ly=0;
+            
+            lines.forEach(l => {
+                if(l.startsWith('G1')) {
+                    const xm = l.match(/X([\d\.-]+)/);
+                    const ym = l.match(/Y([\d\.-]+)/);
+                    if(xm) lx = parseFloat(xm[1]);
+                    if(ym) ly = parseFloat(ym[1]);
+                    const ang = -(ly * Math.PI/180);
+                    pts.push(new THREE.Vector3(lx, r*Math.cos(ang), r*Math.sin(ang)));
+                }
+            });
+            const geometry = createRibbonGeometry(pts, 3.3);
+            const mat = new THREE.MeshLambertMaterial({ color: 0x2ecc71, side: THREE.DoubleSide });
+            fiberGroup.add(new THREE.Mesh(geometry, mat));
+            scene.add(fiberGroup);
+        }
+
+        function createRibbonGeometry(points, width) {
+            const positions = [];
+            const halfW = width / 2;
+            for(let i=0; i < points.length - 1; i++) {
+                const p1 = points[i]; const p2 = points[i+1];
+                const direction = new THREE.Vector3().subVectors(p2, p1).normalize();
+                const normal = new THREE.Vector3(0, p1.y, p1.z).normalize();
+                const binormal = new THREE.Vector3().crossVectors(direction, normal).normalize().multiplyScalar(halfW);
+                const v1 = new THREE.Vector3().copy(p1).add(binormal);
+                const v2 = new THREE.Vector3().copy(p1).sub(binormal);
+                const v3 = new THREE.Vector3().copy(p2).add(binormal);
+                const v4 = new THREE.Vector3().copy(p2).sub(binormal);
+                positions.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+                positions.push(v2.x, v2.y, v2.z, v4.x, v4.y, v4.z, v3.x, v3.y, v3.z);
+            }
+            const g = new THREE.BufferGeometry();
+            g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            g.computeVertexNormals();
+            return g;
+        }
+
+        function draw2DMap(lines, pct) {
+            const canvas = document.getElementById('canvas2d');
+            const ctx = canvas.getContext('2d');
+            const d = parseFloat(document.getElementById('mandrelDiameter').value);
+            const scale = 4;
+            
+            // --- FIX V42: AUTO-CALCULATE MAP WIDTH FROM GCODE ---
+            let maxX = 0;
+            lines.forEach(l => {
+                const xm = l.match(/X([\d\.-]+)/);
+                if(xm) {
+                    const x = parseFloat(xm[1]);
+                    if(x > maxX) maxX = x;
+                }
+            });
+            if(maxX < 10) maxX = parseFloat(document.getElementById('partLength').value);
+            
+            canvas.width = (maxX + 10) * scale;
+            canvas.height = (Math.PI*d)*scale;
+            // ----------------------------------------------------
+
+            ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = "#e0e0e0";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i=0; i<=10; i++) {
+                const y = (canvas.height / 10) * i;
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+            }
+            ctx.stroke();
+            
+            let lastX=0, lastY=0;
+            let type = "helical"; 
+            
+            let widthVal = 3.3;
+            const widthInput = document.querySelector('.l-width');
+            if(widthInput) widthVal = parseFloat(widthInput.value);
+            const scaledWidth = widthVal * scale;
+
+            const totalLines = lines.length;
+            const limit = Math.floor(totalLines * (pct / 100));
+
+            for(let i = 0; i < limit; i++) {
+                const line = lines[i];
+                if(line.includes('[HOOP]')) type = "hoop";
+                if(line.includes('[HELICAL]')) type = "helical";
+                
+                if(!line.startsWith('G1')) continue;
+                const xm = line.match(/X([\d\.-]+)/);
+                const ym = line.match(/Y([\d\.-]+)/);
+                let nextX = xm ? parseFloat(xm[1]) : lastX;
+                let nextY = ym ? parseFloat(ym[1]) : lastY;
+                
+                if (xm || ym) {
+                    drawWrappedLine(ctx, lastX, lastY, nextX, nextY, scale, Math.PI*d, scaledWidth, type);
+                    lastX = nextX; lastY = nextY;
+                }
+            }
+        }
+        
+        function drawWrappedLine(ctx, x1, y1Deg, x2, y2Deg, scale, circ, lineWidth, type) {
+            const dx = x2 - x1;
+            const dyDeg = y2Deg - y1Deg;
+            const steps = Math.ceil(Math.abs(dyDeg) / 5) + 2; 
+            let cx = x1;
+            let cyDeg = y1Deg;
+            for(let i=1; i<=steps; i++) {
+                const t = i / steps;
+                const nx = x1 + dx*t;
+                const nyDeg = y1Deg + dyDeg*t;
+                const cyMod = ((cyDeg % 360) + 360) % 360;
+                const nyMod = ((nyDeg % 360) + 360) % 360;
+                const py1 = (cyMod / 360) * circ * scale;
+                const py2 = (nyMod / 360) * circ * scale;
+                const px1 = cx * scale;
+                const px2 = nx * scale;
+                if (Math.abs(nyMod - cyMod) <= 180) { 
+                    // Outer Stroke
+                    ctx.lineWidth = lineWidth;
+                    ctx.strokeStyle = type === 'hoop' ? "rgba(41, 128, 185, 0.8)" : "rgba(123, 31, 162, 0.8)"; 
+                    ctx.beginPath(); ctx.moveTo(px1, py1); ctx.lineTo(px2, py2); ctx.stroke();
+                    
+                    // Inner Core
+                    ctx.lineWidth = lineWidth * 0.8;
+                    ctx.strokeStyle = type === 'hoop' ? "rgba(52, 152, 219, 0.9)" : "rgba(255, 214, 0, 0.9)";
+                    ctx.beginPath(); ctx.moveTo(px1, py1); ctx.lineTo(px2, py2); ctx.stroke();
+                }
+                cx = nx; cyDeg = nyDeg;
+            }
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('gcode-output').textContent));
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+    </script>
+</body>
+</html>

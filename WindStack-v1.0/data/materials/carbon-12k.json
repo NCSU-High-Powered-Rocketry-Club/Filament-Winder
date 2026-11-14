@@ -1,0 +1,14 @@
+{
+  "id": "carbon-12k-t300",
+  "name": "Carbon 12K (T300-class)",
+  "fiberType": "carbon",
+  "towSize": "12K",
+  "filamentCount": 12000,
+  "nominalWidth": 6.0,
+  "spreadWidthRange": { "min": 5.0, "max": 7.0 },
+  "thicknessPerLayer": 0.25,
+  "density": 1.76,
+  "tensileStrength": 3530,
+  "tensileModulus": 230,
+  "costPerKg": 22
+}

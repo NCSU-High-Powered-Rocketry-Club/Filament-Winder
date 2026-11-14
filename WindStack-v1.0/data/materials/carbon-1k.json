@@ -1,0 +1,14 @@
+{
+  "id": "carbon-1k-t300",
+  "name": "Carbon 1K (T300-class)",
+  "fiberType": "carbon",
+  "towSize": "1K",
+  "filamentCount": 1000,
+  "nominalWidth": 1.0,
+  "spreadWidthRange": { "min": 0.8, "max": 1.5 },
+  "thicknessPerLayer": 0.08,
+  "density": 1.76,
+  "tensileStrength": 3530,
+  "tensileModulus": 230,
+  "costPerKg": 60
+}

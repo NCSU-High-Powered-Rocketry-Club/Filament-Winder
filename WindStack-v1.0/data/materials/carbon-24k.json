@@ -1,0 +1,14 @@
+{
+  "id": "carbon-24k-t300",
+  "name": "Carbon 24K (T300-class)",
+  "fiberType": "carbon",
+  "towSize": "24K",
+  "filamentCount": 24000,
+  "nominalWidth": 10.0,
+  "spreadWidthRange": { "min": 8.0, "max": 12.0 },
+  "thicknessPerLayer": 0.40,
+  "density": 1.76,
+  "tensileStrength": 3530,
+  "tensileModulus": 230,
+  "costPerKg": 20
+}

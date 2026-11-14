@@ -1,0 +1,14 @@
+{
+  "id": "carbon-6k-t300",
+  "name": "Carbon 6K (T300-class)",
+  "fiberType": "carbon",
+  "towSize": "6K",
+  "filamentCount": 6000,
+  "nominalWidth": 3.0,
+  "spreadWidthRange": { "min": 2.5, "max": 4.5 },
+  "thicknessPerLayer": 0.20,
+  "density": 1.76,
+  "tensileStrength": 3530,
+  "tensileModulus": 230,
+  "costPerKg": 28
+}

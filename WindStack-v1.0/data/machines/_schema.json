@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Machine Profile",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "version": { "type": "string" },
+        "connection": {
+          "type": "object",
+          "properties": {
+            "interface": { "type": "string" },
+            "host": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "axes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "function": { "enum": ["carriage", "mandrel_rotation", "payout_tilt", "payout_yaw", "cross_feed"] },
+          "type": { "enum": ["linear", "rotary"] },
+          "unit": { "enum": ["mm", "degrees"] },
+          "range": {
+            "type": "object",
+            "properties": {
+              "min": { "type": ["number", "null"] },
+              "max": { "type": ["number", "null"] }
+            }
+          },
+          "maxSpeed": { "type": "number" },
+          "maxAccel": { "type": "number" },
+          "homePosition": { "type": "number" }
+        }
+      }
+    },
+    "gcode": {
+      "type": "object",
+      "properties": {
+        "header": { "type": "array", "items": { "type": "string" } },
+        "footer": { "type": "array", "items": { "type": "string" } },
+        "coordinateMode": { "enum": ["absolute", "relative"] },
+        "lineNumbers": { "type": "boolean" },
+        "checksums": { "type": "boolean" },
+        "decimalPlaces": { "type": "number" },
+        "macros": { "type": "object" },
+        "speedControl": {
+          "type": "object",
+          "properties": {
+            "useDynamicLimits": { "type": "boolean" },
+            "feedRateMode": { "enum": ["F-word", "inverse-time"] }
+          }
+        }
+      }
+    },
+    "turnaround": {
+      "type": "object",
+      "properties": {
+        "method": { "enum": ["dwell-rotate", "payout-tilt"] },
+        "dwellDegrees": { "type": "number" },
+        "dwellSpeed": { "type": "number" },
+        "payoutTiltAngle": { "type": ["number", "null"] }
+      }
+    },
+    "physicalLimits": {
+      "type": "object",
+      "properties": {
+        "maxMandrelDiameter": { "type": ["number", "null"] },
+        "maxPartLength": { "type": ["number", "null"] },
+        "maxMandrelWeight": { "type": ["number", "null"] }
+      }
+    }
+  }
+}

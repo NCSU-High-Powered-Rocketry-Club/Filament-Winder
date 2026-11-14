@@ -1,0 +1,14 @@
+{
+  "id": "carbon-3k-t300",
+  "name": "Carbon 3K (T300-class)",
+  "fiberType": "carbon",
+  "towSize": "3K",
+  "filamentCount": 3000,
+  "nominalWidth": 2.0,
+  "spreadWidthRange": { "min": 1.5, "max": 3.5 },
+  "thicknessPerLayer": 0.125,
+  "density": 1.76,
+  "tensileStrength": 3530,
+  "tensileModulus": 230,
+  "costPerKg": 35
+}

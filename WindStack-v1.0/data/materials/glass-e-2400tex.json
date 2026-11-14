@@ -1,0 +1,14 @@
+{
+  "id": "glass-e-2400tex",
+  "name": "E-Glass 2400tex",
+  "fiberType": "glass",
+  "towSize": "2400tex",
+  "filamentCount": 4000,
+  "nominalWidth": 4.0,
+  "spreadWidthRange": { "min": 3.0, "max": 6.0 },
+  "thicknessPerLayer": 0.25,
+  "density": 2.54,
+  "tensileStrength": 2000,
+  "tensileModulus": 73,
+  "costPerKg": 5
+}

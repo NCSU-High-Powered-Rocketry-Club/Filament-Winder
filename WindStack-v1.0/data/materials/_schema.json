@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Material Profile",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "fiberType": { "type": "string" },
+    "towSize": { "type": "string" },
+    "filamentCount": { "type": "number" },
+    "nominalWidth": { "type": "number" },
+    "spreadWidthRange": {
+      "type": "object",
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" }
+      }
+    },
+    "thicknessPerLayer": { "type": "number" },
+    "density": { "type": "number" },
+    "tensileStrength": { "type": "number" },
+    "tensileModulus": { "type": "number" },
+    "costPerKg": { "type": "number" }
+  }
+}

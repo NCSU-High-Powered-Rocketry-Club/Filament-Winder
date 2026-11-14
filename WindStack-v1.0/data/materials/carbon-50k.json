@@ -1,0 +1,14 @@
+{
+  "id": "carbon-50k-heavy",
+  "name": "Carbon 50K Heavy Tow (Panex 35)",
+  "fiberType": "carbon",
+  "towSize": "50K",
+  "filamentCount": 50000,
+  "nominalWidth": 12.0,
+  "spreadWidthRange": { "min": 8.0, "max": 18.0 },
+  "thicknessPerLayer": 0.28,
+  "density": 1.81,
+  "tensileStrength": 4137,
+  "tensileModulus": 242,
+  "costPerKg": 24
+}

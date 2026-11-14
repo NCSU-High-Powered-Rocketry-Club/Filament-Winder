@@ -1,0 +1,14 @@
+{
+  "id": "aramid-kevlar49",
+  "name": "Kevlar 49",
+  "fiberType": "aramid",
+  "towSize": "1420 denier",
+  "filamentCount": 1000,
+  "nominalWidth": 2.0,
+  "spreadWidthRange": { "min": 1.5, "max": 3.0 },
+  "thicknessPerLayer": 0.15,
+  "density": 1.44,
+  "tensileStrength": 3600,
+  "tensileModulus": 112,
+  "costPerKg": 50
+}
