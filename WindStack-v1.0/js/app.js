@@ -354,6 +354,7 @@ class App {
         const lenInput = document.getElementById('partLength');
         const feedInput = document.getElementById('feedRate');
         const dwellInput = document.getElementById('dwellSpeed');
+        const tiltInput = document.getElementById('tiltSpeed');
 
         const update = () => {
             const d = parseFloat(diamInput.value);
@@ -442,8 +443,9 @@ class App {
                     const length = parseFloat(document.getElementById('partLength').value);
                     const feedRate = parseFloat(document.getElementById('feedRate').value);
                     const dwellSpeed = parseFloat(document.getElementById('dwellSpeed').value);
+                    const tiltSpeed = parseFloat(document.getElementById('tiltSpeed').value);
 
-                    if ([diam, length, feedRate, dwellSpeed].some(isNaN)) {
+                    if ([diam, length, feedRate, dwellSpeed, tiltSpeed].some(isNaN)) {
                         alert('Check your global settings — invalid numbers detected.');
                         loading.classList.remove('active');
                         return;
@@ -460,7 +462,7 @@ class App {
                     // Layer model has .type and .params getters that match PathPlanner's expected format
                     const layers = layerStack.layers;
 
-                    const globalSettings = { feedRate, dwellSpeed };
+                    const globalSettings = { feedRate, dwellSpeed, tiltSpeed };
                     const materialThickness = this.currentMaterial ? this.currentMaterial.thicknessPerLayer : 0.125;
 
                     // Plan all layers
@@ -599,7 +601,8 @@ class App {
             material: this.currentMaterial ? this.currentMaterial.id : null,
             globalSettings: {
                 feedRate: parseFloat(document.getElementById('feedRate').value),
-                dwellSpeed: parseFloat(document.getElementById('dwellSpeed').value)
+                dwellSpeed: parseFloat(document.getElementById('dwellSpeed').value),
+                tiltSpeed: parseFloat(document.getElementById('tiltSpeed').value)
             },
             layers: layerStack.toJSON()
         };
@@ -631,6 +634,7 @@ class App {
                 if (data.globalSettings) {
                     document.getElementById('feedRate').value = data.globalSettings.feedRate;
                     document.getElementById('dwellSpeed').value = data.globalSettings.dwellSpeed;
+                    document.getElementById('tiltSpeed').value = data.globalSettings.tiltSpeed;
                 }
 
                 // Restore machine selection
@@ -727,6 +731,7 @@ class App {
         document.getElementById('partLength').value = 150;
         document.getElementById('feedRate').value = 8000;
         document.getElementById('dwellSpeed').value = 2000;
+        document.getElementById('tiltSpeed').value = 2000;
         this.mandrel = new Mandrel(22.63, 150);
         if (this.viewer3d) this.viewer3d.updateMandrel(22.63, 150);
         this.layerStackUI.clear();
@@ -773,7 +778,8 @@ class App {
                 materialId: this.currentMaterial ? this.currentMaterial.id : null,
                 globalSettings: {
                     feedRate: parseFloat(document.getElementById('feedRate')?.value) || 8000,
-                    dwellSpeed: parseFloat(document.getElementById('dwellSpeed')?.value) || 2000
+                    dwellSpeed: parseFloat(document.getElementById('dwellSpeed')?.value) || 2000,
+                    tiltSpeed: parseFloat(document.getElementById('tiltSpeed')?.value) || 2000
                 },
                 layers: layerStack ? layerStack.toJSON() : null,
                 timestamp: Date.now()
@@ -800,6 +806,7 @@ class App {
             if (data.globalSettings) {
                 document.getElementById('feedRate').value = data.globalSettings.feedRate;
                 document.getElementById('dwellSpeed').value = data.globalSettings.dwellSpeed;
+                document.getElementById('tiltSpeed').value = data.globalSettings.tiltSpeed;
             }
 
             if (data.machineId) {

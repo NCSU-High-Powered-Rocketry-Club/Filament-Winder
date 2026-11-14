@@ -2,8 +2,8 @@
 title WindStack - Filament Winder Controller
 echo.
 echo  ╔═══════════════════════════════════════════════╗
-echo  ║        WindStack - Filament Winder v1.0       ║
-echo  ║   Carbon Fiber Composite Winding Controller   ║
+echo  ║        WindStack - Filament Winder v1.0.1     ║
+echo  ║         Composite Winding Controller          ║
 echo  ╚═══════════════════════════════════════════════╝
 echo.
 

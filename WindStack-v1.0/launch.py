@@ -25,8 +25,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 def main():
     print()
     print("  ╔═══════════════════════════════════════════════╗")
-    print("  ║        WindStack - Filament Winder v1.0       ║")
-    print("  ║   Carbon Fiber Composite Winding Controller   ║")
+    print("  ║        WindStack - Filament Winder v1.0.1     ║")
+    print("  ║         Composite Winding Controller          ║")
     print("  ╚═══════════════════════════════════════════════╝")
     print()
     

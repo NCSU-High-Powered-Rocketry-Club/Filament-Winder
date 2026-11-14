@@ -34,7 +34,7 @@ export class PathPlanner {
 
     planHelicalLayer(mandrelDiam, partLength, layerParams, globalSettings, currentY = 0) {
         const { angle, fiberWidth, skipIndex: skip, extraPasses: extra, lockDegrees: lockDeg } = layerParams;
-        const { feedRate, dwellSpeed } = globalSettings;
+        const { feedRate, dwellSpeed, tiltSpeed } = globalSettings;
         
         const angleRad = angle * (Math.PI / 180);
         const circ = circumference(mandrelDiam);
@@ -51,14 +51,14 @@ export class PathPlanner {
 
         for (let i = 0; i < totalLoops; i++) {
             // Forward pass
-            segments.push(new MotionSegment(SegmentType.TILT, { payoutTilt: fwdZ, feedRate: 2000 }));
+            segments.push(new MotionSegment(SegmentType.TILT, { payoutTilt: fwdZ, feedRate: tiltSpeed }));
             y += rotationsForLength;
             segments.push(new MotionSegment(SegmentType.TRAVERSE, { carriage: partLength, rotation: y, feedRate: feedRate }));
             y += lockDeg;
             segments.push(new MotionSegment(SegmentType.DWELL, { rotation: y, payoutTilt: 0, feedRate: dwellSpeed }));
             
             // Reverse pass
-            segments.push(new MotionSegment(SegmentType.TILT, { payoutTilt: revZ, feedRate: 2000 }));
+            segments.push(new MotionSegment(SegmentType.TILT, { payoutTilt: revZ, feedRate: tiltSpeed }));
             y += rotationsForLength;
             segments.push(new MotionSegment(SegmentType.TRAVERSE, { carriage: 0, rotation: y, feedRate: feedRate }));
             
@@ -79,7 +79,7 @@ export class PathPlanner {
 
     planHoopLayer(mandrelDiam, partLength, layerParams, globalSettings, currentY = 0) {
         const { fiberWidth: width, overlapPercent: overlap, lockDegrees: lockDeg } = layerParams;
-        const { feedRate, dwellSpeed } = globalSettings;
+        const { feedRate, dwellSpeed, tiltSpeed } = globalSettings;
         
         const pitch = width * (1 - (overlap / 100));
         const rots = partLength / pitch;
@@ -88,7 +88,7 @@ export class PathPlanner {
         const segments = [];
         let y = currentY;
 
-        segments.push(new MotionSegment(SegmentType.TILT, { payoutTilt: 35, feedRate: 2000 }));
+        segments.push(new MotionSegment(SegmentType.TILT, { payoutTilt: 35, feedRate: tiltSpeed }));
         
         y += degs;
         segments.push(new MotionSegment(SegmentType.TRAVERSE, { carriage: partLength, rotation: y, feedRate: feedRate }));
